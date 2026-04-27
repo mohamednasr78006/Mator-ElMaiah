@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ماتور المياه</title>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e2e0d8;
+    --border2: #c8c5bb;
+    --text: #1a1916;
+    --text2: #6b6860;
+    --text3: #9e9c96;
+    --blue-bg: #e8f0fb;
+    --blue-text: #1a4a8a;
+    --blue-border: #b8cef0;
+    --green-bg: #e6f4ea;
+    --green-text: #1a6b35;
+    --red-bg: #fdecea;
+    --red-text: #8b1a1a;
+    --amber-bg: #fdf3e3;
+    --amber-text: #7a4a0a;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar-title { font-size: 17px; font-weight: 700; color: var(--text); }
+  .topbar-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .topbar-btn {
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .topbar-btn:active { opacity: 0.8; }
+
+  .page { padding: 14px 12px; max-width: 480px; margin: 0 auto; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+  }
+  .stat-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .stat-value { font-size: 19px; font-weight: 700; color: var(--text); }
+  .stat-value.red { color: var(--red-text); }
+  .stat-value.green { color: var(--green-text); }
+
+  .backup-bar {
+    background: var(--amber-bg);
+    border: 1px solid #e8c97a;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .backup-info { font-size: 12px; color: var(--amber-text); flex: 1; }
+  .backup-info strong { display: block; font-size: 13px; margin-bottom: 1px; }
+  .backup-btns { display: flex; gap: 6px; }
+  .btn-backup, .btn-restore {
+    border-radius: var(--radius-sm);
+    padding: 7px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .btn-backup { background: #fff; color: var(--amber-text); border-color: #e8c97a; }
+  .btn-restore { background: var(--amber-text); color: #fff; border-color: var(--amber-text); }
+  .btn-backup:active, .btn-restore:active { opacity: 0.8; }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    padding-right: 2px;
+  }
+
+  .client-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .client-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 14px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .client-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    font-size: 14px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-left: 10px;
+  }
+  .client-info { flex: 1; }
+  .client-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .client-meta { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .client-actions { display: flex; gap: 6px; align-items: center; }
+  .btn-mia {
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-sm);
+    padding: 7px 13px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-mia:active { opacity: 0.8; }
+  .btn-icon {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-icon:active { background: var(--bg); }
+
+  .client-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+  }
+  .cstat {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+  }
+  .cstat:nth-child(odd) { border-left: none; }
+  .cstat-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+  .cstat-value { font-size: 15px; font-weight: 700; color: var(--text); }
+  .cstat-value.red { color: var(--red-text); }
+  .cstat-value.green { color: var(--green-text); }
+
+  .client-footer { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .pay-row { display: flex; gap: 6px; }
+  .pay-row input {
+    flex: 1;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    direction: rtl;
+  }
+  .pay-row input:focus { outline: none; border-color: #6b9ee8; }
+  .btn-pay {
+    background: var(--green-bg);
+    color: var(--green-text);
+    border: 1px solid #8ecba0;
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .btn-pay:active { opacity: 0.8; }
+  .note-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--text2);
+    font-family: inherit;
+    direction: rtl;
+  }
+  .note-input:focus { outline: none; border-color: #c8c5bb; }
+
+  .empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-title { font-size: 16px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 20px 16px 32px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 0 auto 18px;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .modal label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 5px; }
+  .modal input {
+    width: 100%;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    direction: rtl;
+    margin-bottom: 12px;
+  }
+  .modal input:focus { outline: none; border-color: #6b9ee8; }
+  .modal-btns { display: flex; gap: 8px; margin-top: 4px; }
+  .btn-confirm {
+    flex: 1;
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-cancel {
+    flex: 1;
+    background: var(--bg);
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-confirm:active, .btn-cancel:active { opacity: 0.8; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a1916;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 200;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .mia-badge {
+    display: inline-block;
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  .paid-full { background: var(--green-bg); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">ماتور المياه</div>
+    <div class="topbar-sub" id="last-save-label">لم يتم حفظ نسخة احتياطية بعد</div>
+  </div>
+  <button class="topbar-btn" onclick="openModal()">+ عميل</button>
+</div>
+
+<div class="page">
+  <div class="summary-grid" id="summary-grid"></div>
+
+  <div class="backup-bar">
+    <div class="backup-info">
+      <strong>النسخ الاحتياطي</strong>
+      احفظ ملف على جهازك بعد كل تغيير مهم
+    </div>
+    <div class="backup-btns">
+      <button class="btn-backup" onclick="doBackup()">حفظ</button>
+      <button class="btn-restore" onclick="triggerRestore()">استعادة</button>
+    </div>
+  </div>
+  <input type="file" id="restore-input" accept=".json" style="display:none" onchange="doRestore(event)">
+
+  <div class="section-label">العملاء</div>
+  <div id="clients-list"></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">إضافة عميل جديد</div>
+    <label>اسم العميل</label>
+    <input id="inp-name" type="text" placeholder="مثال: محمد أحمد" />
+    <label>مساحة الأرض بالفدان</label>
+    <input id="inp-feddans" type="number" placeholder="مثال: 3.5" min="0.25" step="0.25" />
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+      <button class="btn-confirm" onclick="addClient()">إضافة</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PRICE_PER_FEDDAN_PER_MIA = 200;
+const STORAGE_KEY = 'mator_elmiyah_v2';
+
+let clients = [];
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) clients = parsed;
+    }
+  } catch(e) { clients = []; }
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clients));
+  } catch(e) {
+    showToast('تحذير: فشل الحفظ التلقائي!');
+  }
+}
+
+function calcDue(c) {
+  return Math.round(c.miaat * c.feddans * PRICE_PER_FEDDAN_PER_MIA);
+}
+function calcRemaining(c) {
+  return calcDue(c) - Math.round(c.wasil);
+}
+
+function getInitials(name) {
+  const parts = name.trim().split(' ');
+  if (parts.length >= 2) return parts[0][0] + parts[1][0];
+  return name.slice(0, 2);
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ar-EG');
+}
+
+function render() {
+  renderSummary();
+  renderClients();
+}
+
+function renderSummary() {
+  const grid = document.getElementById('summary-grid');
+  if (clients.length === 0) { grid.innerHTML = ''; return; }
+  const totalDue = clients.reduce((a, c) => a + calcDue(c), 0);
+  const totalPaid = clients.reduce((a, c) => a + Math.round(c.wasil), 0);
+  const totalRem = totalDue - totalPaid;
+  grid.innerHTML = `
+    <div class="stat"><div class="stat-label">إجمالي المستحق</div><div class="stat-value">${fmt(totalDue)} ج</div></div>
+    <div class="stat"><div class="stat-label">إجمالي الواصل</div><div class="stat-value green">${fmt(totalPaid)} ج</div></div>
+    <div class="stat"><div class="stat-label">إجمالي المتبقي</div><div class="stat-value ${totalRem > 0 ? 'red' : 'green'}">${fmt(totalRem)} ج</div></div>
+    <div class="stat"><div class="stat-label">عدد العملاء</div><div class="stat-value">${clients.length}</div></div>
+  `;
+}
+
+function renderClients() {
+  const list = document.getElementById('clients-list');
+  if (clients.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🌾</div>
+        <div class="empty-title">لا يوجد عملاء بعد</div>
+        <div class="empty-sub">اضغط "+ عميل" لإضافة أول عميل</div>
+      </div>`;
+    return;
+  }
+  list.innerHTML = clients.map((c, i) => {
+    const due = calcDue(c);
+    const rem = calcRemaining(c);
+    const paidFull = rem <= 0;
+    return `
+    <div class="client-card ${paidFull ? 'paid-full' : ''}">
+      <div class="client-header">
+        <div class="client-avatar">${getInitials(c.name)}</div>
+        <div class="client-info">
+          <div class="client-name">${c.name}</div>
+          <div class="client-meta">${c.feddans} فدان &nbsp;·&nbsp; <span class="mia-badge">${c.miaat} مية</span></div>
+        </div>
+        <div class="client-actions">
+          <button class="btn-mia" onclick="addMia(${i})">+ مية</button>
+          <button class="btn-icon" onclick="confirmDelete(${i})" title="حذف">✕</button>
+        </div>
+      </div>
+      <div class="client-stats">
+        <div class="cstat"><div class="cstat-label">المستحق</div><div class="cstat-value">${fmt(due)} ج</div></div>
+        <div class="cstat"><div class="cstat-label">الواصل</div><div class="cstat-value green">${fmt(c.wasil)} ج</div></div>
+        <div class="cstat" style="border-bottom:none"><div class="cstat-label">المتبقي</div><div class="cstat-value ${rem > 0 ? 'red' : 'green'}">${fmt(rem)} ج</div></div>
+        <div class="cstat" style="border-bottom:none"><div class="cstat-label">الحالة</div><div class="cstat-value ${paidFull ? 'green' : 'red'}" style="font-size:13px">${paidFull ? 'مسدد بالكامل' : 'عليه مبلغ'}</div></div>
+      </div>
+      <div class="client-footer">
+        <div class="pay-row">
+          <input type="number" id="pay-${i}" placeholder="أضف مبلغ واصل (جنيه)" min="1" step="1" />
+          <button class="btn-pay" onclick="addPayment(${i})">سجّل</button>
+        </div>
+        <input class="note-input" type="text" id="note-${i}" placeholder="ملاحظة..." value="${escHtml(c.note || '')}" onchange="updateNote(${i}, this.value)" />
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('inp-name').focus(), 100);
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-feddans').value = '';
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function addClient() {
+  const name = document.getElementById('inp-name').value.trim();
+  const feddans = parseFloat(document.getElementById('inp-feddans').value);
+  if (!name) { showToast('من فضلك ادخل اسم العميل'); return; }
+  if (!feddans || feddans <= 0) { showToast('من فضلك ادخل مساحة الأرض'); return; }
+  clients.push({ name, feddans, miaat: 0, wasil: 0, note: '' });
+  saveData();
+  closeModal();
+  render();
+  showToast('تمت إضافة ' + name);
+}
+
+function addMia(i) {
+  clients[i].miaat++;
+  saveData();
+  render();
+  showToast('تمت إضافة مية لـ ' + clients[i].name);
+}
+
+function addPayment(i) {
+  const inp = document.getElementById('pay-' + i);
+  const val = parseFloat(inp.value);
+  if (!val || val <= 0) { showToast('ادخل مبلغ صحيح'); return; }
+  clients[i].wasil = Math.round(clients[i].wasil + val);
+  saveData();
+  render();
+  showToast('تم تسجيل ' + fmt(val) + ' ج لـ ' + clients[i].name);
+}
+
+function updateNote(i, val) {
+  clients[i].note = val;
+  saveData();
+}
+
+function confirmDelete(i) {
+  if (confirm('هتحذف ' + clients[i].name + '؟\nالبيانات هترجعش!')) {
+    const name = clients[i].name;
+    clients.splice(i, 1);
+    saveData();
+    render();
+    showToast('تم حذف ' + name);
+  }
+}
+
+function doBackup() {
+  const data = {
+    version: 2,
+    date: new Date().toISOString(),
+    clients: clients
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const now = new Date();
+  const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  a.href = url;
+  a.download = 'mator-almiyah-' + dateStr + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  const label = document.getElementById('last-save-label');
+  label.textContent = 'آخر نسخة: ' + now.toLocaleTimeString('ar-EG');
+  showToast('تم حفظ النسخة الاحتياطية');
+}
+
+function triggerRestore() {
+  if (clients.length > 0) {
+    if (!confirm('استعادة النسخة الاحتياطية هتمسح البيانات الحالية. متأكد؟')) return;
+  }
+  document.getElementById('restore-input').click();
+}
+
+function doRestore(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.clients && Array.isArray(data.clients)) {
+        clients = data.clients;
+        saveData();
+        render();
+        showToast('تمت الاستعادة بنجاح - ' + clients.length + ' عملاء');
+      } else {
+        showToast('الملف غير صحيح، تأكد من الملف');
+      }
+    } catch(err) {
+      showToast('خطأ في قراءة الملف');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+loadData();
+render();
+</script>
+</body>
+</html>
